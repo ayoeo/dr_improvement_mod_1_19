@@ -21,7 +21,9 @@ public class ClientPlayerInteractionManagerMixin {
 
   @Inject(method = "method_41934", at = @At("HEAD"), cancellable = true)
   private void eee(ClientPlayerEntity clientPlayerEntity, Hand hand, BlockHitResult blockHitResult, CallbackInfoReturnable<ActionResult> cir) {
-    // Disable client-side block place (ability heads mostly are weird)
-    cir.setReturnValue(ActionResult.CONSUME);
+    // Disable client-side block place for ability heads (weird on 1.19 idk)
+    if (clientPlayerEntity.getStackInHand(hand).getTranslationKey().equals("block.minecraft.player_head")) {
+      cir.setReturnValue(ActionResult.CONSUME);
+    }
   }
 }

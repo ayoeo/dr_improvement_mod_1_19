@@ -40,6 +40,8 @@ public abstract class ClientPlayNetworkHandlerMixin implements TickingPacketList
 
   @Inject(method = "onEntityTrackerUpdate", at = @At("HEAD"))
   public void onEntityTrackerUpdateHead(EntityTrackerUpdateS2CPacket packet, CallbackInfo ci) {
+    NetworkThreadUtils.forceMainThread(packet, this, this.client);
+
     if (client.world == null) return;
     var player = client.world.getEntityById(packet.id());
     if (player instanceof PlayerEntity) {
@@ -62,6 +64,7 @@ public abstract class ClientPlayNetworkHandlerMixin implements TickingPacketList
 
   @Inject(method = "onScoreboardPlayerUpdate", at = @At("HEAD"), cancellable = true)
   public void onScoreboardPlayerUpdateHead(ScoreboardPlayerUpdateS2CPacket packet, CallbackInfo ci) {
+    NetworkThreadUtils.forceMainThread(packet, this, this.client);
     if (!Objects.equals(packet.getObjectiveName(), "health") || client.world == null) {
       return;
     }
