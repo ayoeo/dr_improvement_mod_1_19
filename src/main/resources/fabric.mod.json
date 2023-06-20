@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "group": "com.twoandahalfdevs",
+  "id": "dr_improvement_mod",
+  "version": "${version}",
+  "metadata": {
+    "name": "DR Improvement Mod",
+    "description": "A mod to improve dr",
+    "contributors": {
+      "Your name here": "Aris"
+    }
+  },
+  "intermediate_mappings": "net.fabricmc:intermediary",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "com.twoandahalfdevs.dr_improvement_mod.DrImprovementMod"
+    ]
+  },
+  "mixins": [
+    "dr_improvement_mod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "fabric-api": "*",
+    "minecraft": "~1.19.4",
+    "java": ">=17"
+  }
+}

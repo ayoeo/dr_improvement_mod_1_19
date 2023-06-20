@@ -2,8 +2,8 @@ package com.twoandahalfdevs.dr_improvement_mod.mixin;
 
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ClientSettingsUpdateC2SPacket;
-import net.minecraft.network.packet.c2s.play.CommandCompletionRequestC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
+import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,9 +15,9 @@ public abstract class ClientConnectionMixin {
   @Shadow
   public abstract void send(Packet<?> packet);
 
-  private ClientSettingsUpdateC2SPacket latestSettings;
+  private ClientSettingsC2SPacket latestSettings;
 
-  private CommandCompletionRequestC2SPacket latestCompletion;
+  private RequestCommandCompletionsC2SPacket latestCompletion;
 
   private long lastSettingsTime = 0L;
 
@@ -25,20 +25,20 @@ public abstract class ClientConnectionMixin {
 
   @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
   private void sendHead(Packet<?> packet, CallbackInfo ci) {
-    if (packet instanceof ClientSettingsUpdateC2SPacket) {
+    if (packet instanceof ClientSettingsC2SPacket) {
       if (packet == latestSettings) {
         // We're resending it's fine
         latestSettings = null;
       } else {
-        latestSettings = (ClientSettingsUpdateC2SPacket) packet;
+        latestSettings = (ClientSettingsC2SPacket) packet;
         ci.cancel();
       }
-    } else if (packet instanceof CommandCompletionRequestC2SPacket) {
+    } else if (packet instanceof RequestCommandCompletionsC2SPacket) {
       if (packet == latestCompletion) {
         // We're resending it's fine
         latestCompletion = null;
       } else {
-        latestCompletion = (CommandCompletionRequestC2SPacket) packet;
+        latestCompletion = (RequestCommandCompletionsC2SPacket) packet;
         ci.cancel();
       }
     }

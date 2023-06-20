@@ -1,19 +1,17 @@
 package com.twoandahalfdevs.dr_improvement_mod;
 
-import com.mojang.blaze3d.framebuffer.Framebuffer;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.Framebuffer;
 import org.joml.Math;
-import org.quiltmc.loader.api.ModContainer;
-import org.quiltmc.loader.api.minecraft.ClientOnly;
-import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
-import org.quiltmc.qsl.lifecycle.api.client.event.ClientTickEvents;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@ClientOnly
-public class DrImprovementMod implements ClientModInitializer, ClientTickEvents.Start {
+public class DrImprovementMod implements ModInitializer, ClientTickEvents.StartTick {
   public static float latestExp = 0f;
   public static float prevExp = 0f;
   public static long expUpdateTime = 0L;
@@ -37,12 +35,7 @@ public class DrImprovementMod implements ClientModInitializer, ClientTickEvents.
   }
 
   @Override
-  public void onInitializeClient(ModContainer mod) {
-
-  }
-
-  @Override
-  public void startClientTick(MinecraftClient client) {
+  public void onStartTick(MinecraftClient client) {
     if (client.world != null) {
       client.player.getDisplayName().getString();
       // Update health
@@ -86,5 +79,10 @@ public class DrImprovementMod implements ClientModInitializer, ClientTickEvents.
         }
       }
     }
+  }
+
+  @Override
+  public void onInitialize() {
+    ClientTickEvents.START_CLIENT_TICK.register(this);
   }
 }

@@ -44,7 +44,7 @@ public class OverlayShader {
     Identifier identifier = new Identifier("shaders/program/" + file);
     var resourceManager = MinecraftClient.getInstance().getResourceManager();
     Resource resource = resourceManager.getResourceOrThrow(identifier);
-    InputStream inputStream = resource.open();
+    InputStream inputStream = resource.getInputStream();
 
     String string = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     if (string == null) {

@@ -1,24 +1,22 @@
 {
   "required": true,
-  "minVersion": "0.8",
   "package": "com.twoandahalfdevs.dr_improvement_mod.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "ClientConnectionMixin",
-    "ClientPlayerInteractionManagerMixin",
-    "ItemStackMixin"
-  ],
   "client": [
     "BossBarMixin",
+    "ClientConnectionMixin",
     "ClientPlayerEntityMixin",
+    "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin",
     "EntityRendererMixin",
     "GameRendererMixin",
     "ItemRendererMixin",
+    "ItemStackMixin",
     "MinecraftClientMixin",
     "PlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": []
 }
