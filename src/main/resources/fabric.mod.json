@@ -3,13 +3,11 @@
   "group": "com.twoandahalfdevs",
   "id": "dr_improvement_mod",
   "version": "${version}",
-  "metadata": {
-    "name": "DR Improvement Mod",
-    "description": "A mod to improve dr",
-    "contributors": {
-      "Your name here": "Aris"
-    }
-  },
+  "name": "DR Improvement Mod",
+  "description": "A mod to improve dr",
+  "authors": [
+    "Aris"
+  ],
   "intermediate_mappings": "net.fabricmc:intermediary",
   "environment": "client",
   "entrypoints": {
