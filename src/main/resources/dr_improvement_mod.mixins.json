@@ -13,7 +13,8 @@
     "ItemRendererMixin",
     "ItemStackMixin",
     "MinecraftClientMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "InteractionManagerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

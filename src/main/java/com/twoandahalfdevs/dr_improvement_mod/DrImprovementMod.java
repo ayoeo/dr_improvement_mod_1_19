@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DrImprovementMod implements ModInitializer, ClientTickEvents.StartTick {
   public static float latestExp = 0f;
   public static float prevExp = 0f;
+  public static int prevSlot = 0;
   public static long expUpdateTime = 0L;
 
   public static Map<String, Integer> scoreWasUpdated = new ConcurrentHashMap<>();

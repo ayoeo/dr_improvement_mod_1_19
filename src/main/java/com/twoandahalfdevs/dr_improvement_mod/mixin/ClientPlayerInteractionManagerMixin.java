@@ -26,4 +26,10 @@ public class ClientPlayerInteractionManagerMixin {
       cir.setReturnValue(ActionResult.CONSUME);
     }
   }
+
+  // Fix stupid 1.8 thing
+  @Inject(method = "hasLimitedAttackSpeed", at = @At("HEAD"), cancellable = true)
+  private void aaa(CallbackInfoReturnable<Boolean> cir) {
+    cir.setReturnValue(false);
+  }
 }

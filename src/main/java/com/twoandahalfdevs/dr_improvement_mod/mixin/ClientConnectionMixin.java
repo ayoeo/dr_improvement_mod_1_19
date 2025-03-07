@@ -1,9 +1,17 @@
 package com.twoandahalfdevs.dr_improvement_mod.mixin;
 
+import com.twoandahalfdevs.dr_improvement_mod.DrImprovementMod;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.PendingUpdateManager;
+import net.minecraft.item.Items;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.util.Hand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,6 +48,32 @@ public abstract class ClientConnectionMixin {
       } else {
         latestCompletion = (RequestCommandCompletionsC2SPacket) packet;
         ci.cancel();
+      }
+    }
+  }
+
+  @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("TAIL"))
+  private void sendTail(Packet<?> packet, CallbackInfo ci) {
+    if (packet instanceof UpdateSelectedSlotC2SPacket) {
+      var player = MinecraftClient.getInstance().player;
+
+      if (player != null) {
+        var prevSlot = DrImprovementMod.prevSlot;
+        var newSlot = player.getInventory().selectedSlot;
+
+        var item = player.getInventory().getMainHandStack();
+        var key = item.getTranslationKey();
+        if (key.equals("block.minecraft.player_head")) {
+          // Right click it
+          ((InteractionManagerAccessor) MinecraftClient.getInstance().interactionManager)
+            .invokeSendSequencedPacket(player.clientWorld, seq ->
+              new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, seq));
+
+          // Now go back
+          player.getInventory().selectedSlot = prevSlot;
+        }
+
+        DrImprovementMod.prevSlot = newSlot;
       }
     }
   }
