@@ -1,11 +1,8 @@
 package com.twoandahalfdevs.dr_improvement_mod.mixin;
 
-import com.twoandahalfdevs.dr_improvement_mod.DrImprovementMod;
+import com.twoandahalfdevs.dr_improvement_mod.DrImprovementModKt;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.PendingUpdateManager;
-import net.minecraft.item.Items;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
@@ -58,7 +55,7 @@ public abstract class ClientConnectionMixin {
       var player = MinecraftClient.getInstance().player;
 
       if (player != null) {
-        var prevSlot = DrImprovementMod.prevSlot;
+        var prevSlot = DrImprovementModKt.getPrevSlot();
         var newSlot = player.getInventory().selectedSlot;
 
         var item = player.getInventory().getMainHandStack();
@@ -73,7 +70,7 @@ public abstract class ClientConnectionMixin {
           player.getInventory().selectedSlot = prevSlot;
         }
 
-        DrImprovementMod.prevSlot = newSlot;
+        DrImprovementModKt.setPrevSlot(newSlot);
       }
     }
   }

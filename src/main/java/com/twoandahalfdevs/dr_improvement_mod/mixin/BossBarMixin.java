@@ -1,5 +1,6 @@
 package com.twoandahalfdevs.dr_improvement_mod.mixin;
 
+import com.twoandahalfdevs.dr_improvement_mod.DrImprovementModKt;
 import net.minecraft.client.gui.hud.BossBarHud;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.boss.BossBar;
@@ -22,7 +23,14 @@ public class BossBarMixin {
     // Don't render the bar for player hp, just the text
     var plainText = bar.getName().getString();
     if (plainText.contains("Lv ") && plainText.contains(" - HP ")) {
+      try {
+        var split = plainText.split("-");
+        DrImprovementModKt.setClas(split[0].trim());
+      } catch (Exception ignored) {
+      }
+
       ci.cancel();
     }
+
   }
 }

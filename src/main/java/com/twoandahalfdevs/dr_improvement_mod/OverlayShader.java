@@ -18,6 +18,7 @@ public class OverlayShader {
 
   private static final int energyUniform;
   private static final int healthUniform;
+  private static final int manaUniform;
   private static final int aspectRatioUniform;
 
   static {
@@ -34,6 +35,7 @@ public class OverlayShader {
       // Load uniforms
       energyUniform = GL20.glGetUniformLocation(overlayProgram, "energyPercent");
       healthUniform = GL20.glGetUniformLocation(overlayProgram, "healthPercent");
+      manaUniform = GL20.glGetUniformLocation(overlayProgram, "manaPercent");
       aspectRatioUniform = GL20.glGetUniformLocation(overlayProgram, "aspectRatio");
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -66,13 +68,15 @@ public class OverlayShader {
     var window = MinecraftClient.getInstance().getWindow();
     var player = MinecraftClient.getInstance().player;
     if (player == null) return;
+    if (MinecraftClient.getInstance().options.hudHidden) return;
 
     int lastId = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
     GL20.glUseProgram(overlayProgram);
 
     // Update uniforms
-    GL20.glUniform1f(energyUniform, DrImprovementMod.interpolatedExp());
+    GL20.glUniform1f(energyUniform, DrImprovementModKt.interpolatedExp());
     GL20.glUniform1f(healthUniform, player.getHealth() / player.getMaxHealth());
+    GL20.glUniform1f(manaUniform, player.experienceLevel / 100f);
     GL20.glUniform1f(aspectRatioUniform, (float) window.getFramebufferWidth() / window.getFramebufferHeight());
 
     // easy get draw

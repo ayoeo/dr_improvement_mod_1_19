@@ -8,16 +8,19 @@
     "ClientPlayerEntityMixin",
     "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin",
-    "EntityRendererMixin",
+    "EntityRenderMixin",
     "GameRendererMixin",
+    "InGameHudMixin",
+    "InteractionManagerAccessor",
     "ItemRendererMixin",
     "ItemStackMixin",
     "MinecraftClientMixin",
-    "PlayerEntityMixin",
-    "InteractionManagerAccessor"
+    "PlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
-  "mixins": []
+  "mixins": [
+    "EntityMixin"
+  ]
 }
