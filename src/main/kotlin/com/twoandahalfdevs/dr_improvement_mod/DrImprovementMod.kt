@@ -10,6 +10,7 @@ import org.joml.Math
 import java.math.RoundingMode
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 var latestExp: Float = 0f
@@ -27,8 +28,8 @@ private var lastUpdatedPotCdTime = System.currentTimeMillis()
 // Might need to rollback if we get a reflect in there
 var rollbackLastUpdatedBonusTime = System.currentTimeMillis()
 var rollbackLastUpdatedCombatTime = System.currentTimeMillis()
-var rollbackBonusTimer = 0
-var rollbackCombatTimer = 0
+var rollbackBonusTimer = 0.0
+var rollbackCombatTimer = 0.0
 
 // Combat tracking stuff
 var lastUpdatedBonusTime = System.currentTimeMillis()
@@ -43,13 +44,13 @@ var lastUpdatedCombatTime = System.currentTimeMillis()
     field = value
   }
 
-var bonusTimer = 0
+var bonusTimer = 0.0
   set(value) {
     rollbackBonusTimer = field
     field = value
   }
 
-var combatTimer = 0
+var combatTimer = 0.0
   set(value) {
     rollbackCombatTimer = field
     field = value
@@ -69,7 +70,8 @@ private var totalPots = 0
 private val ultCdReg =
   """§(.)(?:The Fast|Berserk|Divine Protection|Deaths Grasp): \[(?:([0-9]*)m)? ?(?:([0-9]*)s)?]""".toRegex()
 private val potReg = """\[([0-9]*)/5] Potions: \[([0-9]*)s]""".toRegex()
-private val rankReg = """S|S\+|S\+\+|GD|QA|LORE|GM|PMOD|DEV|OWNER""".toRegex()
+
+//private val rankReg = """S|S\+|S\+\+|GD|QA|LORE|GM|PMOD|DEV|OWNER""".toRegex()
 private val guildReg = """\[.+]""".toRegex()
 
 private val abilityReg = """(.*) has activated The Fast""".toRegex()
@@ -218,12 +220,12 @@ class DrImprovementMod : ModInitializer, ClientTickEvents.StartTick {
       }
 
       val probablyCombatTimer =
-        ((combatTimer.toDouble() / 20.0) - (System.currentTimeMillis() - lastUpdatedCombatTime) / 1000.0).coerceAtLeast(
+        (combatTimer - (System.currentTimeMillis() - lastUpdatedCombatTime) / 1000.0).coerceAtLeast(
           0.0
         )
 
       val probablyBonusTimer =
-        ((bonusTimer.toDouble() / 20.0) - (System.currentTimeMillis() - lastUpdatedBonusTime) / 1000.0).coerceAtLeast(
+        (bonusTimer.toDouble() - (System.currentTimeMillis() - lastUpdatedBonusTime) / 1000.0).coerceAtLeast(
           0.0
         )
 
@@ -354,57 +356,63 @@ fun onChatMessage(msg: String) {
 
     val (dur, cd) = durAndCdFromAbility(abil) ?: return
     if (p != null && abil != null) {
-      println("player activated: ${p?.name}, abil='$abil'")
+//      println("player activated: ${p?.name}, abil='$abil'")
       playerCdMap.put(p, Pair(abil, System.currentTimeMillis()))
     }
-    println("dur: dur=$dur, cd=$cd")
+//    println("dur: dur=$dur, cd=$cd")
   }
 
   val abilMatches = abilityReg.find(msg)
   val matches = abilMatches?.groupValues?.getOrNull(1)
   if (matches?.endsWith(minecraft.player!!.name.string) == true) {
     // Ability takes us out of combat now
-    combatTimer = 0
+    combatTimer = 0.0
   }
 
   val dmgMatches = debugDmg.find(msg)
   val attacked = dmgMatches?.groupValues?.getOrNull(1)
   val attacker = dmgMatches?.groupValues?.getOrNull(2)
   val probablyCombatTimer =
-    ((combatTimer.toDouble() / 20.0) - (System.currentTimeMillis() - lastUpdatedCombatTime) / 1000.0).coerceAtLeast(
+    (combatTimer - (System.currentTimeMillis() - lastUpdatedCombatTime) / 1000.0).coerceAtLeast(
       0.0
     )
 
   if (attacked != null && attacked.isNotEmpty()) {
     val playersContainsAttacked = minecraft.world!!.players.any {
+//      println("player: ${it.name.string}, $attacked")
       attacked.endsWith(it.name.string)
     }
 
-    val attackedIsPlayer = attacked.contains(guildReg) ||
-      attacked.contains(rankReg) ||
-      playersContainsAttacked
+    val attackedIsPlayer = attacked.contains(guildReg) || playersContainsAttacked
+//      ) &&
+//      !attacked.contains(' ')
+    //      attacked.contains(rankReg) ||
+
+//    println("attack: $attackedIsPlayer, $attacked")
 
     // Attacked is player pvp combat
     if (attackedIsPlayer) {
       // COMBAT BONUS WHOAHHO
       if (probablyCombatTimer <= 0.0) {
         lastUpdatedBonusTime = System.currentTimeMillis()
-        bonusTimer = (20 * combatBonusTime).roundToInt()
+        bonusTimer = combatBonusTime
       }
 
       lastUpdatedCombatTime = System.currentTimeMillis()
-      combatTimer = (20 * combatPvPTime).roundToInt()
+      combatTimer = max(combatPvPTime, probablyCombatTimer)
+
+//      println("setting timer: probably $probablyCombatTimer, $combatTimer now")
     } else {
       // Attacked is monster pve combat
 
       // COMBAT BONUS WHOAHHO
       if (probablyCombatTimer <= 0.0) {
         lastUpdatedBonusTime = System.currentTimeMillis()
-        bonusTimer = (20 * combatBonusTime).roundToInt()
+        bonusTimer = combatBonusTime
       }
 
       lastUpdatedCombatTime = System.currentTimeMillis()
-      combatTimer = (20 * combatPvETime).roundToInt()
+      combatTimer = max(combatPvETime, probablyCombatTimer)
     }
   } else if (attacker != null && attacker.isNotEmpty()) {
     // MONSTER??
@@ -412,7 +420,7 @@ fun onChatMessage(msg: String) {
       // COMBAT BONUS WHOAHHO
       if (probablyCombatTimer <= 0.0) {
         lastUpdatedBonusTime = System.currentTimeMillis()
-        bonusTimer = (20 * combatBonusTime).roundToInt()
+        bonusTimer = combatBonusTime
       }
 
       val playersContainsAttacker = minecraft.world!!.players.any {
@@ -420,10 +428,10 @@ fun onChatMessage(msg: String) {
       }
 
       lastUpdatedCombatTime = System.currentTimeMillis()
-      combatTimer = if (!attacker.contains(' ') && playersContainsAttacker) {
-        (20 * combatPvPTime).roundToInt()
+      combatTimer = if (playersContainsAttacker) {
+        max(combatPvPTime, probablyCombatTimer)
       } else {
-        (20 * combatPvETime).roundToInt()
+        max(combatPvETime, probablyCombatTimer)
       }
     }
   }
