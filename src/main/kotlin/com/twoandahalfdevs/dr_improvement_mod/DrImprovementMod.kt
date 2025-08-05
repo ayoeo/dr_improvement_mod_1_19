@@ -73,6 +73,7 @@ private val potReg = """\[([0-9]*)/5] Potions: \[([0-9]*)s]""".toRegex()
 
 //private val rankReg = """S|S\+|S\+\+|GD|QA|LORE|GM|PMOD|DEV|OWNER""".toRegex()
 private val guildReg = """\[.+]""".toRegex()
+private val guildTagReg = """\[(.+)] .+""".toRegex()
 
 private val abilityReg = """(.*) has activated The Fast""".toRegex()
 private val debugDmg = """[0-9]+ \S*DMG -> (.+) \[[0-9]+ HP]|-[0-9]+ \S*HP \((.+)\)""".toRegex()
@@ -314,9 +315,19 @@ private fun durAndCdFromAbility(ability: String?) = when (ability) {
   else -> null
 }
 
+fun guildTag(name: String): String? {
+  val tagMatches = guildTagReg.find(name)
+  if (tagMatches != null) {
+    val tag = tagMatches.groupValues.getOrNull(1)
+//    println("tag: $tag")
+    return tag
+  }
+  return null
+}
+
 fun cdString(player: AbstractClientPlayerEntity): String? {
-  val (abil, activationTime) = playerCdMap.get(player) ?: return "§a▪"
-  val (dur, cdLong, cdShort) = durAndCdFromAbility(abil) ?: return "§a▪"
+  val (abil, activationTime) = playerCdMap.get(player) ?: return null
+  val (dur, cdLong, cdShort) = durAndCdFromAbility(abil) ?: return null
   val secsSinceActivation = (System.currentTimeMillis() - activationTime) / 1000.0
 
   val n = ceil(secsSinceActivation).roundToInt()
@@ -332,7 +343,8 @@ fun cdString(player: AbstractClientPlayerEntity): String? {
     "§e${n}"
   } else {
     // Ready to go
-    "§a▪"
+//    "§a▪"
+    null
   }
 }
 

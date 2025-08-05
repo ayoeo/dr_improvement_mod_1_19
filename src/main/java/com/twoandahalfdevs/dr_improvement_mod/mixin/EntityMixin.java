@@ -18,8 +18,9 @@ public class EntityMixin {
       case 16777045:
         cir.setReturnValue(0xff45a5);
         break;
+      // Rare
       case 5636095:
-        cir.setReturnValue(0x454bff);
+        cir.setReturnValue(0x90D5FF);
         break;
       case 5635925:
         cir.setReturnValue(0x3b632f);

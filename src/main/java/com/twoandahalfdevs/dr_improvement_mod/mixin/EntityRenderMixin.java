@@ -18,7 +18,10 @@ public class EntityRenderMixin<T extends Entity> {
     Entity entity = args.get(0);
     Text text = args.get(1);
     if (entity instanceof AbstractClientPlayerEntity && ModConfig.INSTANCE.getSettings().getAbilityNametags()) {
-      args.set(1, text.copy().append(" §7(" + DrImprovementModKt.cdString((AbstractClientPlayerEntity) entity) + "§7)"));
+      var cds = DrImprovementModKt.cdString((AbstractClientPlayerEntity) entity);
+      if (cds != null) {
+        args.set(1, text.copy().append(" §7(" + cds + "§7)"));
+      }
     }
   }
 }
