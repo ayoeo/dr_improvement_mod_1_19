@@ -9,9 +9,7 @@ import net.minecraft.client.util.math.MatrixStack
 import org.joml.Math
 import java.math.RoundingMode
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.ceil
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 var latestExp: Float = 0f
 var prevExp: Float = 0f
@@ -71,7 +69,6 @@ private val ultCdReg =
   """§(.)(?:The Fast|Berserk|Divine Protection|Deaths Grasp): \[(?:([0-9]*)m)? ?(?:([0-9]*)s)?]""".toRegex()
 private val potReg = """\[([0-9]*)/5] Potions: \[([0-9]*)s]""".toRegex()
 
-//private val rankReg = """S|S\+|S\+\+|GD|QA|LORE|GM|PMOD|DEV|OWNER""".toRegex()
 private val guildReg = """\[.+]""".toRegex()
 
 private val abilityReg = """(.*) has activated The Fast""".toRegex()
@@ -79,16 +76,12 @@ private val debugDmg = """[0-9]+ \S*DMG -> (.+) \[[0-9]+ HP]|-[0-9]+ \S*HP \((.+
 private val notRealCombat = listOf("FALL")
 private val reflectReg = """\*\s+(OPPONENT\s+)?REFLECTED.*\[\d+]""".toRegex()
 
-private val anyActiveStartReg = """(.*) has activated (The Fast|Berserk|Divine Protection|Death's Grasp)""".toRegex()
-
 private val combatBonusTime
   get() = 4 + 0.5 * ModConfig.settings.justMyNaturePoints
 
 var scoreWasUpdated: MutableMap<String, Int> = ConcurrentHashMap()
 var latestCurrentHealth: MutableMap<String, Float> = ConcurrentHashMap()
 var maxHealthValues: MutableMap<String, Int> = ConcurrentHashMap()
-
-val playerCdMap = hashMapOf<AbstractClientPlayerEntity, Pair<String, Long>>()
 
 private const val BASE_PVE = 8.0
 private val combatPvETime: Double
@@ -306,37 +299,6 @@ class DrImprovementMod : ModInitializer, ClientTickEvents.StartTick {
   }
 }
 
-private fun durAndCdFromAbility(ability: String?) = when (ability) {
-  "The Fast" -> Triple(8, 45, 25.65)
-  "Berserk" -> Triple(10, 55, 17.6)
-  "Divine Protection" -> Triple(10, 55, 29.07)
-  "Death's Grasp" -> Triple(6, 50, 28.5)
-  else -> null
-}
-
-fun cdString(player: AbstractClientPlayerEntity): String? {
-  val (abil, activationTime) = playerCdMap.get(player) ?: return null
-  val (dur, cdLong, cdShort) = durAndCdFromAbility(abil) ?: return null
-  val secsSinceActivation = (System.currentTimeMillis() - activationTime) / 1000.0
-
-  val n = ceil(secsSinceActivation).roundToInt()
-
-  return if (secsSinceActivation < dur) {
-    // Still active
-    "§a${dur - n}"
-  } else if (secsSinceActivation < cdShort) {
-    // On cd
-    "§c${n}"
-  } else if (secsSinceActivation < cdLong) {
-    // Might be on cd
-    "§e${n}"
-  } else {
-    // Ready to go
-//    "§a▪"
-    null
-  }
-}
-
 fun onChatMessage(msg: String) {
   val minecraft = MinecraftClient.getInstance()
 
@@ -347,27 +309,12 @@ fun onChatMessage(msg: String) {
     return
   }
 
-  val activeStartMatches = anyActiveStartReg.find(msg)
-  if (activeStartMatches != null) {
-    val name = activeStartMatches.groupValues.getOrNull(1)
-    val abil = activeStartMatches.groupValues.getOrNull(2)
-    val p = minecraft.world!!.players.find {
-      name?.endsWith(it.name.string) == true
-    }
-
-    val (dur, cd) = durAndCdFromAbility(abil) ?: return
-    if (p != null && abil != null) {
-//      println("player activated: ${p?.name}, abil='$abil'")
-      playerCdMap.put(p, Pair(abil, System.currentTimeMillis()))
-    }
-//    println("dur: dur=$dur, cd=$cd")
-  }
-
   val abilMatches = abilityReg.find(msg)
   val matches = abilMatches?.groupValues?.getOrNull(1)
   if (matches?.endsWith(minecraft.player!!.name.string) == true) {
-    // Ability takes us out of combat now
-    combatTimer = 0.0
+    // Ability does NOT take us out of combat now
+    lastUpdatedBonusTime = System.currentTimeMillis()
+    bonusTimer = combatBonusTime
   }
 
   val dmgMatches = debugDmg.find(msg)

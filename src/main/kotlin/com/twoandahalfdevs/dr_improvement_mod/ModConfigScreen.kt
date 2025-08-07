@@ -40,10 +40,10 @@ object ModConfigScreen {
     )
 
     general.addEntry(
-      entryBuilder.startBooleanToggle(Text.literal("Ability Nametags"), ModConfig.settings.abilityNametags)
+      entryBuilder.startBooleanToggle(Text.literal("Guild Nametags"), ModConfig.settings.guildNametags)
         .setDefaultValue(false)
-        .setTooltip(Text.literal("Ability durations / cooldowns in the nametags."))
-        .setSaveConsumer { newValue -> ModConfig.settings.abilityNametags = newValue }
+        .setTooltip(Text.literal("Light green nametags for guild members."))
+        .setSaveConsumer { newValue -> ModConfig.settings.guildNametags = newValue }
         .build()
     )
 

@@ -7,7 +7,7 @@ import java.io.FileWriter
 
 data class ConfigData(
   var colorBlind: Boolean = false,
-  var abilityNametags: Boolean = true,
+  var guildNametags: Boolean = true,
   var usefulInfo: Boolean = true,
   var shadowmeldPoints: Int = 0,
   var justMyNaturePoints: Int = 0,
